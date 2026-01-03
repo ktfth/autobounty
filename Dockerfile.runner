@@ -1,0 +1,46 @@
+FROM ubuntu:24.04
+
+# Prevent interactive prompts
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install base dependencies
+RUN apt-get update -y && \
+    apt-get install -y --no-install-recommends \
+        ca-certificates \
+        curl \
+        git \
+        jq \
+        python3 \
+        python3-pip \
+        unzip \
+        make \
+        build-essential \
+        gcc \
+        libpcap-dev \
+        golang-go \
+        coreutils \
+        procps && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Set Go environment
+ENV GOPATH=/root/go
+ENV PATH="${PATH}:/usr/local/go/bin:${GOPATH}/bin"
+
+# Install ProjectDiscovery tools
+RUN go install -v github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest && \
+    go install -v github.com/projectdiscovery/httpx/cmd/httpx@latest && \
+    go install -v github.com/projectdiscovery/naabu/v2/cmd/naabu@latest
+
+# Verify installations
+RUN which subfinder httpx naabu jq && \
+    subfinder -version && \
+    httpx -version && \
+    naabu -version
+
+WORKDIR /work
+
+# Keep bash profile with PATH
+RUN echo 'export PATH="${PATH}:/root/go/bin"' >> /root/.bashrc
+
+CMD ["sleep", "infinity"]
