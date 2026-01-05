@@ -1,1 +1,4 @@
 output/
+screenshots/
+*.sqlite3
+input/scope.txt
