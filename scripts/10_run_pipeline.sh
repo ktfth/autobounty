@@ -97,6 +97,10 @@ fi
 log "Extracting technologies and building analysis..."
 bash "$ROOT_DIR/scripts/15_analyze_tech.sh" "$OUT_DIR"
 
+# 6) Visual Reconnaissance (gowitness)
+log "Running visual reconnaissance..."
+bash "$ROOT_DIR/scripts/15_run_gowitness.sh" "$OUT_DIR"
+
 log "=== PIPELINE COMPLETE ==="
 echo "$RUN_ID" > "$ROOT_DIR/output/LAST_RUN"
 

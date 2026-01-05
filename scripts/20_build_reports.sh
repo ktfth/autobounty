@@ -37,6 +37,12 @@ if [[ -f "$TECH_STATUS" ]]; then
   interesting_count=$(jq -r '.interesting_tech // 0' "$TECH_STATUS" 2>/dev/null || echo 0)
 fi
 
+# Visual reconnaissance stats
+screenshot_count=0
+if [[ -f "$OUT_DIR/screenshots.status.json" ]]; then
+  screenshot_count=$(jq -r '.screenshots // 0' "$OUT_DIR/screenshots.status.json" 2>/dev/null || echo 0)
+fi
+
 # Extract top technologies
 declare -A tech_stats
 tech_list=""
@@ -80,6 +86,7 @@ esac
   echo "| Potential Admin Panels | **$admin_count** |"
   echo "| Dev/Staging Environments | **$dev_count** |"
   echo "| Interesting Technologies | **$interesting_count** |"
+  echo "| Screenshots Captured | **$screenshot_count** |"
   echo
   echo "## Analysis Status $tech_emoji"
   echo
@@ -135,6 +142,16 @@ esac
     else
       echo "_None detected_"
     fi
+  fi
+
+  echo
+  echo "## 📸 Visual Reconnaissance"
+  echo
+  if [[ -f "$OUT_DIR/report.html" ]]; then
+    echo "- [**Open Screenshot Gallery (HTML)**](report.html)"
+    echo "- Captured **$screenshot_count** screenshots of live services."
+  else
+    echo "_No visual reconnaissance data available._"
   fi
 
   echo

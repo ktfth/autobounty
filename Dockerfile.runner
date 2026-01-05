@@ -6,20 +6,20 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Install base dependencies
 RUN apt-get update -y && \
     apt-get install -y --no-install-recommends \
-        ca-certificates \
-        curl \
-        git \
-        jq \
-        python3 \
-        python3-pip \
-        unzip \
-        make \
-        build-essential \
-        gcc \
-        libpcap-dev \
-        golang-go \
-        coreutils \
-        procps && \
+    ca-certificates \
+    curl \
+    git \
+    jq \
+    python3 \
+    python3-pip \
+    unzip \
+    make \
+    build-essential \
+    gcc \
+    libpcap-dev \
+    golang-go \
+    coreutils \
+    procps && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -27,16 +27,37 @@ RUN apt-get update -y && \
 ENV GOPATH=/root/go
 ENV PATH="${PATH}:/usr/local/go/bin:${GOPATH}/bin"
 
-# Install ProjectDiscovery tools
+# Install google-chrome-stable for gowitness (avoids snap issues)
+RUN apt-get update -y && \
+    apt-get install -y --no-install-recommends \
+    wget \
+    gnupg && \
+    wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/google-chrome.gpg && \
+    echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list && \
+    apt-get update -y && \
+    apt-get install -y --no-install-recommends \
+    google-chrome-stable \
+    fonts-liberation \
+    libnss3 \
+    libgbm1 \
+    libasound2t64 \
+    libatk-bridge2.0-0 \
+    libgtk-3-0 && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install ProjectDiscovery tools and gowitness
 RUN go install -v github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest && \
     go install -v github.com/projectdiscovery/httpx/cmd/httpx@latest && \
-    go install -v github.com/projectdiscovery/naabu/v2/cmd/naabu@latest
+    go install -v github.com/projectdiscovery/naabu/v2/cmd/naabu@latest && \
+    go install -v github.com/sensepost/gowitness@latest
 
 # Verify installations
-RUN which subfinder httpx naabu jq && \
+RUN which subfinder httpx naabu gowitness jq && \
     subfinder -version && \
     httpx -version && \
-    naabu -version
+    naabu -version && \
+    gowitness version
 
 WORKDIR /work
 

@@ -27,7 +27,7 @@ fi
 
 # Extract technologies from httpx
 log "Extracting technologies from httpx results..."
-jq -r '[.[] | select(.technologies != null and (.technologies | length) > 0) | {url: .url, title: .title, status_code: .status_code, server: .server, technologies: .technologies, content_type: .content_type}]' \
+jq -s -r '[.[] | select(.tech != null and (.tech | length) > 0) | {url: .url, title: .title, status_code: .status_code, server: .server, technologies: .tech, content_type: .content_type}]' \
   "$HTTPX_JSON" > "$TECH_JSON" 2>/dev/null || echo '[]' > "$TECH_JSON"
 
 TECH_COUNT=$(jq 'length' "$TECH_JSON" 2>/dev/null || echo 0)
@@ -35,16 +35,16 @@ log "✓ Technologies detected on $TECH_COUNT URLs"
 
 # Create comprehensive targets analysis
 log "Building comprehensive targets analysis..."
-jq -r '[.[] | {
+jq -s -r '[.[] | {
   url: .url,
   title: .title // "No title",
   status_code: .status_code,
   server: .server // "Unknown",
   content_type: .content_type // "Unknown",
-  technologies: .technologies // [],
+  technologies: .tech // [],
   is_admin: (.title // "" | ascii_downcase | test("admin|dashboard|panel|login|portal|cpanel|plesk|phpmyadmin")),
   is_dev: (.url | test("dev|stag|test|uat|qa|demo"; "i")),
-  has_interesting_tech: ((.technologies // []) | map(ascii_downcase) | any(test("wordpress|drupal|joomla|magento|laravel|django|rails|spring|tomcat|jenkins|gitlab|grafana|kibana")))
+  has_interesting_tech: ((.tech // []) | map(ascii_downcase) | any(test("wordpress|drupal|joomla|magento|laravel|django|rails|spring|tomcat|jenkins|gitlab|grafana|kibana")))
 }]' "$HTTPX_JSON" > "$TARGETS_JSON" 2>/dev/null || echo '[]' > "$TARGETS_JSON"
 
 # Count interesting targets
